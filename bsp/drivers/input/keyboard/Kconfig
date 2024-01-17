@@ -1,0 +1,15 @@
+menuconfig AW_INPUT_KEYBOARD
+	bool "Keyboards"
+	default y
+	help 
+		support keyboards
+
+if AW_INPUT_KEYBOARD
+
+config KEYBOARD_SUNXI
+        tristate "softwinnner KEY BOARD support"
+        help
+                Say Y here to enable the keyboard, support 7 keys.
+                based on verify board.
+
+endif
