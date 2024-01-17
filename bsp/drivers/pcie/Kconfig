@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: GPL-2.0-only
+
+menu "PCIe Drivers"
+	depends on AW_BSP
+
+config SUNXI_PCIE_PLAT
+	tristate "Platform bus based Allwiner PCIe Controller"
+	depends on AW_BSP
+	help
+	 This selects the Allwiner PCIe controller support. Select this if
+	 you have a PCIe controller on Platform bus.
+	 If you have a controller with this interface, say Y or M here.
+	 If unsure, say N.
+
+config SUNXI_PCIE
+	tristate "Allwinner PCIe controller"
+	depends on SUNXI_PCIE_PLAT
+	help
+	  Enables support for the PCIe controller in the Allwinner SoC.
+
+config SUNXI_PCIE_DMA
+	tristate "Allwinner PCIe DMA"
+	depends on SUNXI_PCIE
+	help
+	  Enables support for the PCIe embedded DMA in the Allwinner SoC.
+
+
+endmenu
