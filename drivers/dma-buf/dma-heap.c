@@ -41,6 +41,10 @@ struct dma_heap {
 	dev_t heap_devt;
 	struct list_head list;
 	struct cdev heap_cdev;
+#ifdef CONFIG_AW_BSP
+	struct kref refcount;
+    struct device *heap_dev;
+#endif
 };
 
 static LIST_HEAD(heap_list);
@@ -48,6 +52,80 @@ static DEFINE_MUTEX(heap_list_lock);
 static dev_t dma_heap_devt;
 static struct class *dma_heap_class;
 static DEFINE_XARRAY_ALLOC(dma_heap_minors);
+
+#ifdef CONFIG_AW_BSP
+
+struct dma_heap *dma_heap_find(const char *name)
+{
+        struct dma_heap *h;
+
+        mutex_lock(&heap_list_lock);
+        list_for_each_entry(h, &heap_list, list) {
+                if (!strcmp(h->name, name)) {
+                        kref_get(&h->refcount);
+                        mutex_unlock(&heap_list_lock);
+                        return h;
+                }
+        }
+        mutex_unlock(&heap_list_lock);
+        return NULL;
+}
+
+void dma_heap_buffer_free(struct dma_buf *dmabuf)
+{
+        dma_buf_put(dmabuf);
+}
+EXPORT_SYMBOL_GPL(dma_heap_buffer_free);
+
+#endif
+
+
+#ifdef CONFIG_AW_BSP
+
+struct dma_buf *dma_heap_buffer_alloc(struct dma_heap *heap, size_t len,
+                                      unsigned int fd_flags,
+                                      unsigned int heap_flags)
+{
+        if (fd_flags & ~DMA_HEAP_VALID_FD_FLAGS)
+                return ERR_PTR(-EINVAL);
+
+        if (heap_flags & ~DMA_HEAP_VALID_HEAP_FLAGS)
+                return ERR_PTR(-EINVAL);
+        /*
+         * Allocations from all heaps have to begin
+         * and end on page boundaries.
+         */
+        len = PAGE_ALIGN(len);
+        if (!len)
+                return ERR_PTR(-EINVAL);
+
+        return heap->ops->allocate(heap, len, fd_flags, heap_flags);
+}
+EXPORT_SYMBOL_GPL(dma_heap_buffer_alloc);
+
+int dma_heap_bufferfd_alloc(struct dma_heap *heap, size_t len,
+                            unsigned int fd_flags,
+                            unsigned int heap_flags)
+{
+        struct dma_buf *dmabuf;
+        int fd;
+
+        dmabuf = dma_heap_buffer_alloc(heap, len, fd_flags, heap_flags);
+
+        if (IS_ERR(dmabuf))
+                return PTR_ERR(dmabuf);
+
+        fd = dma_buf_fd(dmabuf, fd_flags);
+        if (fd < 0) {
+                dma_buf_put(dmabuf);
+                /* just return, as put will call release and that will free */
+        }
+        return fd;
+
+}
+EXPORT_SYMBOL_GPL(dma_heap_bufferfd_alloc);
+
+#else
 
 static int dma_heap_buffer_alloc(struct dma_heap *heap, size_t len,
 				 unsigned int fd_flags,
@@ -63,6 +141,9 @@ static int dma_heap_buffer_alloc(struct dma_heap *heap, size_t len,
 
 	return heap->ops->allocate(heap, len, fd_flags, heap_flags);
 }
+
+#endif
+
 
 static int dma_heap_open(struct inode *inode, struct file *file)
 {
@@ -96,9 +177,16 @@ static long dma_heap_ioctl_allocate(struct file *file, void *data)
 	if (heap_allocation->heap_flags & ~DMA_HEAP_VALID_HEAP_FLAGS)
 		return -EINVAL;
 
+#ifdef CONFIG_AW_BSP
+	fd = dma_heap_bufferfd_alloc(heap, heap_allocation->len,
+					heap_allocation->fd_flags,
+					heap_allocation->heap_flags);
+#else
 	fd = dma_heap_buffer_alloc(heap, heap_allocation->len,
-				   heap_allocation->fd_flags,
-				   heap_allocation->heap_flags);
+					heap_allocation->fd_flags,
+					heap_allocation->heap_flags);
+#endif
+
 	if (fd < 0)
 		return fd;
 
@@ -106,6 +194,64 @@ static long dma_heap_ioctl_allocate(struct file *file, void *data)
 
 	return 0;
 }
+
+
+#ifdef CONFIG_AW_BSP
+
+static void dma_heap_release(struct kref *ref)
+{
+        struct dma_heap *heap = container_of(ref, struct dma_heap, refcount);
+        int minor = MINOR(heap->heap_devt);
+
+        /* Note, we already holding the heap_list_lock here */
+        list_del(&heap->list);
+
+        device_destroy(dma_heap_class, heap->heap_devt);
+        cdev_del(&heap->heap_cdev);
+        xa_erase(&dma_heap_minors, minor);
+
+        kfree(heap);
+}
+
+void dma_heap_put(struct dma_heap *h)
+{
+        /*
+         * Take the heap_list_lock now to avoid racing with code
+         * scanning the list and then taking a kref.
+         */
+        mutex_lock(&heap_list_lock);
+        kref_put(&h->refcount, dma_heap_release);
+        mutex_unlock(&heap_list_lock);
+}
+EXPORT_SYMBOL_GPL(dma_heap_put);
+
+/**
+ * dma_heap_get_dev() - get device struct for the heap
+ * @heap: DMA-Heap to retrieve device struct from
+ *
+ * Returns:
+ * The device struct for the heap.
+ */
+struct device *dma_heap_get_dev(struct dma_heap *heap)
+{
+        return heap->heap_dev;
+}
+EXPORT_SYMBOL_GPL(dma_heap_get_dev);
+
+/**
+ * dma_heap_get_name() - get heap name
+ * @heap: DMA-Heap to retrieve private data for
+ *
+ * Returns:
+ * The char* for the heap name.
+ */
+const char *dma_heap_get_name(struct dma_heap *heap)
+{
+        return heap->name;
+}
+EXPORT_SYMBOL_GPL(dma_heap_get_name);
+
+#endif
 
 static unsigned int dma_heap_ioctl_cmds[] = {
 	DMA_HEAP_IOCTL_ALLOC,

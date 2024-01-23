@@ -12,3 +12,13 @@ config DMABUF_HEAPS_CMA
 	  Choose this option to enable dma-buf CMA heap. This heap is backed
 	  by the Contiguous Memory Allocator (CMA). If your system has these
 	  regions, you should say Y here.
+
+menuconfig DMABUF_HEAPS_DEFERRED_FREE
+        bool "DMA-BUF heaps deferred-free library"
+        help
+          Choose this option to enable the DMA-BUF heaps deferred-free library.
+
+menuconfig DMABUF_HEAPS_PAGE_POOL
+        bool "DMA-BUF heaps page-pool library"
+        help
+          Choose this option to enable the DMA-BUF heaps page-pool library.
