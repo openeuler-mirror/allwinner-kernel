@@ -265,6 +265,7 @@ static const struct sunxi_cpufreq_soc_data sun50i_h6_data = {
 static const struct of_device_id sun50i_cpufreq_match_list[] = {
 	{ .compatible = "allwinner,sun50i-h6", .data = &sun50i_h6_data },
 	{ .compatible = "allwinner,sun50i-h616", .data = &sun50i_h616_data },
+	{ .compatible = "allwinner,sun50i-h618", .data = &sun50i_h616_data },
 	{}
 };
 MODULE_DEVICE_TABLE(of, sun50i_cpufreq_match_list);
