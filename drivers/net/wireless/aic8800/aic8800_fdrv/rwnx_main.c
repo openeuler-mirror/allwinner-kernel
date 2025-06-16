@@ -5004,17 +5004,12 @@ static int rwnx_cfg80211_start_ap(struct wiphy *wiphy, struct net_device *dev,
  *	interface. This should reject the call when AP mode wasn't started.
  */
 // for mainline linux 
-#if (LINUX_VERSION_CODE >= HIGH_KERNEL_VERSION)
-static int rwnx_cfg80211_change_beacon(struct wiphy *wiphy, struct net_device *dev,
-                                       struct cfg80211_ap_update *params)
-#else
+/*static int rwnx_cfg80211_change_beacon(struct wiphy *wiphy, struct net_device *dev,
+                                       struct cfg80211_ap_update *params)*/
 static int rwnx_cfg80211_change_beacon(struct wiphy *wiphy, struct net_device *dev,
                                        struct cfg80211_beacon_data *info)
-#endif
 {
-#if (LINUX_VERSION_CODE >= HIGH_KERNEL_VERSION)
-    struct cfg80211_beacon_data *info = &params->beacon;
-#endif
+    //struct cfg80211_beacon_data *info = &params->beacon;
     struct rwnx_hw *rwnx_hw = wiphy_priv(wiphy);
     struct rwnx_vif *vif = netdev_priv(dev);
     struct rwnx_bcn *bcn = &vif->ap.bcn;
