@@ -169,6 +169,35 @@
 				};
 			};
 		};
+		
+		mmu_aw: iommu@30f0000 {
+			compatible = "allwinner,iommu-v12-sun50iw9";
+			reg = <0x030f0000 0x1000>;
+			interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
+			interrupt-names = "iommu-irq";
+			clocks = <&ccu CLK_BUS_IOMMU>;
+			clock-names = "iommu";
+			#iommu-cells = <2>;
+		};
+
+		ve: ve@1c0e000 {
+			compatible = "allwinner,sunxi-cedar-ve";
+			reg = <0x01c0e000 0x1000>,
+			      <0x03000000 0x10>,
+			      <0x03001000 0x1000>;
+			interrupts = <GIC_SPI 93 IRQ_TYPE_LEVEL_HIGH>;
+			clocks = <&ccu CLK_BUS_VE>, <&ccu CLK_VE>, <&ccu CLK_MBUS_VE>;
+			clock-names = "bus_ve", "ve", "mbus_ve";
+			resets = <&ccu RST_BUS_VE>;
+			iommus = <&mmu_aw 3 1>;
+			status="disabled";
+		};
+
+		ve1: ve1@1c0e000 {
+			compatible = "allwinner,sunxi-cedar-ve";
+			iommus = <&mmu_aw 2 1>;
+			status="disabled";
+		};
 
 		dma: dma-controller@3002000 {
 			compatible = "allwinner,sun50i-h6-dma";
@@ -509,7 +538,7 @@
 			};
 
 			/omit-if-no-ref/
-			pwm5_pin: pwm5-pin {
+			pwm5_pa_pin: pwm5-pin {
 			pins = "PA12";
 			function = "pwm5";
 			};
@@ -573,7 +602,7 @@
 			};
 
 			/omit-if-no-ref/
-			uart1_pins: uart1-pins {
+			uart1_pg_pins: uart1-pins {
 				pins = "PG6", "PG7";
 				function = "uart1";
 			};
@@ -610,17 +639,6 @@
 			interrupt-controller;
 			#interrupt-cells = <3>;
 		};
-
-                iommu: iommu@30f0000 {
-                        compatible = "allwinner,sun50i-h616-iommu",
-                                     "allwinner,sun50i-h6-iommu";
-                        reg = <0x030f0000 0x10000>;
-                        interrupts = <GIC_SPI 61 IRQ_TYPE_LEVEL_HIGH>;
-                        clocks = <&ccu CLK_BUS_IOMMU>;
-                        resets = <&ccu RST_BUS_IOMMU>;
-                        #iommu-cells = <1>;
-                        status = "okay";
-                };
 
 		mmc0: mmc@4020000 {
 			compatible = "allwinner,sun50i-h616-mmc",
@@ -1286,6 +1304,54 @@
 			status = "disabled";
 			#address-cells = <1>;
 			#size-cells = <0>;
+		};
+		
+		pwm: pwm@300a000 {
+			compatible = "allwinner,sun50i-h616-pwm";
+			reg = <0x0300a000 0x400>;
+			clocks = <&osc24M>, <&ccu CLK_BUS_PWM>;
+			clock-names = "mod", "bus";
+			resets = <&ccu RST_BUS_PWM>;
+			pwm-number = <6>;
+			pwm-base = <0x0>;
+			sunxi-pwms = <&pwm0>, <&pwm1>, <&pwm2>, <&pwm3>, <&pwm4>, <&pwm5>;
+			#pwm-cells = <3>;
+			status = "disabled";
+		};
+
+		pwm0: pwm0@0300a000 {
+			compatible = "allwinner,sunxi-pwm0";
+		};
+
+		pwm1: pwm1@0300a000 {
+			compatible = "allwinner,sunxi-pwm1";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pwm1_ph_pin>;
+		};
+
+		pwm2: pwm2@0300a000 {
+			compatible = "allwinner,sunxi-pwm2";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pwm2_ph_pin>;
+		};
+
+		pwm3: pwm3@0300a000 {
+			compatible = "allwinner,sunxi-pwm3";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pwm3_ph_pin>;
+		};
+
+		pwm4: pwm4@0300a000 {
+			compatible = "allwinner,sunxi-pwm4";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pwm4_ph_pin>;
+		};
+
+		pwm5: pwm5@0300a000 {
+			compatible = "allwinner,sunxi-pwm5";
+			pinctrl-names = "default";
+			pinctrl-0 = <&pwm5_pa_pin>;
+			clk_bypass_output = <0x1>;
 		};
 
 		ths: thermal-sensor@5070400 {
