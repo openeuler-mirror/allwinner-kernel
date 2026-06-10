@@ -1,25 +1,26 @@
 English | [简体中文](./README.md) 
 
-#### Description
+## Overview
 
-This repository provides openEuler kernel source for Allwinner SoCs. The code is still in progress, and any contributation is welcome.
+The purpose of this project is to port the openEuler kernel to support Allwinner development boards. This project is currently under active development, and contributions are welcome.
 
-This repository is based on [openEuler kernel source](https://gitee.com/openeuler/kernel) and [orangepi kernel source](https://github.com/orangepi-xunlong/linux-orangepi/tree/orange-pi-4.9-sun50iw9).
+This repository is based on two upstream repositories: [openEuler kernel source code](https://gitcode.com/openeuler/kernel) and [orangepi kernel source code](https://github.com/orangepi-xunlong/linux-orangepi/tree/orange-pi-4.9-sun50iw9).
 
-To build a complete image of Orange Pi Zero2, please refer to [orangepi-build script](https://github.com/orangepi-xunlong/orangepi-build).
+To build a complete image for the Orange Pi Zero2, please refer to the [orangepi-build script](https://github.com/orangepi-xunlong/orangepi-build).
 
-#### Software Architecture
+## Software Architecture
 
 AAarch64
 
-#### About branch
+## Branch Description
 
-- master: Default branch, which stores entry information.
-- openEuler-20.03-LTS: Stores the kernel source code for porting the [openEuler-20.03-LTS kernel](https://gitee.com/tideao/allwinner-kernel/tree/openEuler-20.03-LTS/) to Allwinner boards.
+- `master`: Default branch, containing entry-level information.
+- `openEuler-20.03-LTS`: Contains the openEuler 20.03 LTS kernel source code ported to Allwinner development boards.
 
-#### Contribution
+## Contribution
 
-Welcome PR, refer to [How to contribute](https://gitee.com/openeuler/community/blob/master/CONTRIBUTING.md).
+Pull Requests are welcome. Please refer to the [Contribution Guide](https://gitcode.com/openeuler/community/blob/master/CONTRIBUTING.md).
 
-If your contributions are for openEuler kernel that are not related to Rockchip Socs, please sumbit patches directly to https://gitee.com/openeuler/kernel.
+For contributions targeting the mainline openEuler community kernel, please submit them directly to [GitCode](https://gitcode.com/openeuler/kernel).
+
  
