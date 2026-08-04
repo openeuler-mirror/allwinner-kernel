@@ -22,3 +22,4 @@ AAarch64
 Pull Requests are welcome. Please refer to the [Contribution Guide](https://gitcode.com/openeuler/community/blob/master/CONTRIBUTING.md).
 
 For contributions targeting the mainline openEuler community kernel, please submit them directly to [GitCode](https://gitcode.com/openeuler/kernel).
+
