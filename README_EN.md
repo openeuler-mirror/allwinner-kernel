@@ -10,7 +10,7 @@ To build a complete image for the Orange Pi Zero2, please refer to the [orangepi
 
 ## Software Architecture
 
-AAarch64
+AArch64
 
 ## Branch Description
 
